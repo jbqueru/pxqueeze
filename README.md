@@ -20,6 +20,16 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 # (Un)important things
 
+## Licensing
+
+The code in this project is licensed under the terms of the
+**[AGPL, version 3](https://www.gnu.org/licenses/agpl-3.0.en.html)**
+or later.
+
+For clarification, the author has no claims on the output of the
+code in this project, whether through copyright, patents, trademarks,
+or any other such rights.
+
 ## Privacy (including GDPR)
 
 By itself, none of the code in this project processes any personal
@@ -54,9 +64,9 @@ such hardware and the bundled software, if any, are typically
 grossly inappropriate by modern standards.
 The code in this project should be considered a research project
 within that context.
-In other words: don't even think of using this code in a way
+In other words: **don't even think of using this code in a way
 that faces the Internet and/or processes arbitrary user data,
-that's not what it's meant for.
+that's not what it's meant for.**
 
 None of the code in this project involves any direct or indirect
 logical or physical data connection to a device or network.
