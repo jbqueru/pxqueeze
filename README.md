@@ -137,6 +137,42 @@ or early 2025.
 
 # Credits
 
+As a program about compression, a lot of credits go to a lot of
+people, such that this list can't be exhaustive.
+- Claude Shannon, who founded information theory in 1948.
+- Robert Fano, for his work (with Shannon) on Shannon-Fano coding,
+two early approaches for entropy coding from 1948-49.
+- David Huffman, for inventing Huffman coding in 1951 while
+studying under Fano.
+- Abraham Lempel and Jacob Ziv, for publishing LZ77 and LZ78
+in 1977-78, which are dictionary compressors at the foundation
+of almost all lossless compression techniques to this day.
+- Jim Storer and Thomas Szymanski, for showing in 1982 with
+LZSS that LZ77 is not alone in the family of sliding-window
+dictionary compressors.
+- Boris Ryabko for the Move-to-Front algorithm in 1980.
+- A variety of people in the late 1980s and early 1990s, for
+combining LZ compression with entropy coding, into a variety
+of formats.
+- Phil Katz, for creating Deflate around 1993, which is the gold
+standard of compression, with a few interesting tricks around
+Huffman tables.
+- Michael Burrows and David Wheeler for creating the eponymous
+Burrows-Wheeler transform in 1994 while at DEC SRC.
+- Julian Seward for creating bzip2 in 1996, which doesn't use
+any LZ stage. Bzip2 shows both the importance of bijective
+pre-processing to surface redundancies and repetitions in the
+data, and of post-processing of Huffman tables to make them
+smaller.
+- Igor Pavlov, for some creative approaches around LZ77 offset /
+length pairs in LZMA in 1996-98, including the observation that
+an LZ matches that overflow the maximum length will continue into
+another match with the same offset.
+- Lode Vandevenne and Jyrki Alakuijala for creating Zopfli in
+2013 while at Google, showing the possibility of spending a lot
+of CPU power can improve compression ratios without having to
+change actual file formats.
+
 # (Un)important things
 
 ## Licensing
