@@ -330,12 +330,65 @@ There also exist a variety of codes that, unlike Huffman,
 don't rely on a table. Golomb, exponential Golomb, Elias
 delta, Elias gamma, Elias omega, Levenshtein, Even-Rodeh...
 Such codes might happen to be smaller than Huffman on
-small enough data sets.
+small enough data sets. Those are all tuned for situations
+where smaller symbols are more frequent than large ones.
 
 As a note, while fixed Huffman tables do make sense for
 cases like that of deflate where the decompressor and
 the compressed data are sent separately, they do not help
 when the decompressor is sent with the data.
+
+## Streaming
+
+While decoding, some stages can be streamed better than
+others, and some stages are more stateful than others.
+
+Entropy codes are stateless and can be decoded in a purely
+streamed fashion.
+
+While LZ codes can be streamed, they are significantly
+stateful since they require to preserve a copy of the
+output's sliding window, which is an issue when that copy
+is later post-processed.
+
+A move-to-front transform can easily be streamed while
+decoding, but it keeps the ordered symbol list as a state.
+
+The Burrows-Wheeler transform is block oriented, which
+means that it is not purely streamable, and it also carries
+a state while a block is getting filled or emptied.
+
+Delta coding is easily stremable and carries very little
+state.
+
+Palette remapping is streamable and stateless.
+
+Re-ordering the pixels (e.g. along a Hilbert or Peano curve,
+and/or in memory order) can be streamed and doesn't carry
+much state.
+
+## Sharing data across images
+
+There might be opportunities to share Huffman tables between
+images. Also, pre-initializing a sliding window for the
+LZ stage could provide significant decompression benefits.
+
+## Tunable parameters
+
+The following parameters are likely tunable, subject to research:
+-Whether the pixels are left in framebuffer order, linearized,
+or re-ordered along a Hilbert or Peano curve.
+-Re-ordering the palette (an exhaustive search might be practical
+up to 3 or 4 colors, palettes beyond that are impractical and
+would require some heuristics about which operations to try).
+-Any combination of pre-processing stages (delta, BWT, MTF).
+-The block size of BWT, and whether a variable block size can
+be beneficial.
+-The set of LZ block types available.
+-The choices of LZ blocks when multiple choices are available.
+This indirectly includes restrictions on block sizes and size
+of the sliding window.
+-The choice of entropy coding.
 
 # (Un)important things
 
