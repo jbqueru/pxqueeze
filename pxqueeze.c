@@ -19,6 +19,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "read_tga.h"
 
@@ -84,7 +85,8 @@ void back_from_front() {
 	}
 }
 
-void generate_huffman_table(unsigned int* input, unsigned int size) {
+unsigned int* generate_huffman_table(unsigned int* input, unsigned int size) {
+	// Count distinct symbols, which is the number of leaves in the tree
 	unsigned int distinct_symbols = 0;
 	for (unsigned int i = 0; i < size; i++) {
 		if (input[i] > 0) {
@@ -92,7 +94,9 @@ void generate_huffman_table(unsigned int* input, unsigned int size) {
 		}
 	}
 
-	printf("Generate Huffman table with %u symbols (%u distinct)\n", size, distinct_symbols);
+	printf("Generate Huffman table with %u symbols (%u distinct)\n",
+				size,
+				distinct_symbols);
 
 /* The size numbers are wrong
 	unsigned int symbol_bits = 0;
@@ -116,9 +120,23 @@ void generate_huffman_table(unsigned int* input, unsigned int size) {
 				(distinct_symbols - 1) * (node_bits + 1) + distinct_symbols * symbol_bits);
 */
 
-	unsigned int* values = calloc(distinct_symbols, sizeof(unsigned int));
-	unsigned int* weights = calloc(distinct_symbols, sizeof(unsigned int));
+	unsigned int* values = malloc(distinct_symbols * sizeof(unsigned int));
+	if (!values) {
+		fprintf(stderr, __FILE__":%d Could not allocate %lu bytes for Huffman values\n",
+					__LINE__,
+					distinct_symbols * sizeof(unsigned int));
+		exit(1);
+	}
 
+	unsigned int* weights = malloc(distinct_symbols * sizeof(unsigned int));
+	if (!weights) {
+		fprintf(stderr, __FILE__":%d Could not allocate %lu bytes for Huffman weights\n",
+					__LINE__,
+					distinct_symbols * sizeof(unsigned int));
+		exit(1);
+	}
+
+	// populate the table of values / weights with leaf values
 	unsigned int w = 0;
 	for (int i = 0; i < size; i++) {
 		if (input[i] > 0) {
@@ -128,6 +146,7 @@ void generate_huffman_table(unsigned int* input, unsigned int size) {
 		}
 	}
 
+	// sort the table (I know, bubble sort isn't fast)
 	for (int j = 0; j < distinct_symbols - 1; j++) {
 		for (int i = 0; i < distinct_symbols - 1; i++) {
 			if (weights[i] > weights[i + 1]) {
@@ -141,16 +160,28 @@ void generate_huffman_table(unsigned int* input, unsigned int size) {
 			}
 		}
 	}
+
 	for (int i = 0; i < distinct_symbols; i++) {
 		printf("Initial weight %u value %u\n", weights[i], values[i]);
 	}
 
-	printf("initializing Huffman table with %u entries\n", 2 * (distinct_symbols - 1));
-	unsigned int* huffman = calloc(2 * (distinct_symbols - 1), sizeof(unsigned int));
+	printf("Creating Huffman table with %u entries\n", 2 * (distinct_symbols - 1));
+	unsigned int* huffman = malloc(2 * (distinct_symbols - 1) * sizeof(unsigned int));
+	if (!huffman) {
+		fprintf(stderr, __FILE__":%d Could not allocate %lu bytes for Huffman table\n",
+					__LINE__,
+					2 * (distinct_symbols - 1) * sizeof(unsigned int));
+		exit(1);
+	}
+
 	unsigned int next_node = size + distinct_symbols - 2;
 
 	for (unsigned int j = 0; j < distinct_symbols - 1; j++) {
-		printf("Creating node %u from %u and %u\n", size + distinct_symbols - j - 2, values[j], values[j + 1]);
+		printf("Creating node %u from %u and %u, weight %u\n",
+					size + distinct_symbols - j - 2,
+					values[j],
+					values[j + 1],
+					weights[j] + weights[j + 1]);
 		huffman[2 * (distinct_symbols - 2 - j)] = values[j];
 		huffman[2 * (distinct_symbols - 2 - j) + 1] = values[j + 1];
 		values[j + 1] = size + distinct_symbols - j - 2;
@@ -166,14 +197,18 @@ void generate_huffman_table(unsigned int* input, unsigned int size) {
 				values[i + 1] = t;
 			}
 		}
-		for (int i = j + 1; i < distinct_symbols; i++) {
-//			printf("weight %u value %u\n", weights[i], values[i]);
-		}
 	}
 
 	free(values);
 	free(weights);
-	free(huffman);
+
+	for (int i = 0; i < distinct_symbols - 1; i++) {
+		printf("Huffman node %u: children %u and %u\n",
+					i + size,
+					huffman[2 * i],
+					huffman [2 * i + 1]);
+	}
+	return huffman;
 }
 
 unsigned int* find_rle_runs(unsigned int * const output_size,
@@ -183,6 +218,8 @@ unsigned int* find_rle_runs(unsigned int * const output_size,
 	unsigned int write_offset = 0;
 	unsigned int current_value;
 	unsigned int current_length;
+
+	printf("Looking for RLE runs from %u symbols\n", input_size);
 
 	unsigned int * output = malloc(input_size * 2 * sizeof(unsigned int));
 
@@ -213,6 +250,7 @@ unsigned int* find_rle_runs(unsigned int * const output_size,
 	}
 
 	*output_size = write_offset;
+	printf("Found %u RLE runs\n", write_offset / 2);
 	return output;
 }
 
@@ -223,8 +261,20 @@ void process_rle_runs(unsigned int* input, unsigned int size) {
 			num_symbols = input[i];
 		}
 	}
+	printf("Symbols in RLE runs range from 0 to %u\n", num_symbols);
+
 	num_symbols++;
-	unsigned int* symbol_frequencies = calloc(num_symbols, sizeof(unsigned int));
+
+	unsigned int* symbol_frequencies = malloc(num_symbols * sizeof(unsigned int));
+
+	if (!symbol_frequencies) {
+		fprintf(stderr, __FILE__":%d Could not allocate %lu bytes for symbol frequencies\n",
+					__LINE__,
+					num_symbols * sizeof(unsigned int));
+		exit(1);
+	}
+
+	memset(symbol_frequencies, 0, num_symbols * sizeof(unsigned int));
 
 	for (unsigned int i = 1; i < size ; i+= 2) {
 		symbol_frequencies[input[i]]++;
