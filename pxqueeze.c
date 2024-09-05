@@ -176,13 +176,22 @@ void generate_huffman_table(unsigned int* input, unsigned int size) {
 	free(huffman);
 }
 
-unsigned int find_rle_runs(unsigned int * output,
+unsigned int* find_rle_runs(unsigned int * const output_size,
 			unsigned int const * const input_data,
 			unsigned int const input_size) {
 	unsigned int read_offset = 0;
 	unsigned int write_offset = 0;
 	unsigned int current_value;
 	unsigned int current_length;
+
+	unsigned int * output = malloc(input_size * 2 * sizeof(unsigned int));
+
+	if (!output) {
+		fprintf(stderr, __FILE__":%d Could not allocate %lu bytes for RLE runs\n",
+					__LINE__,
+					input_size * 2 * sizeof(unsigned int));
+		exit(1);
+	}
 
 	while (read_offset < input_size) {
 		current_value = input_data[read_offset++];
@@ -194,7 +203,17 @@ unsigned int find_rle_runs(unsigned int * output,
 		output[write_offset++] = current_length;
 		output[write_offset++] = current_value;
 	}
-	return write_offset;
+	output = realloc(output, write_offset * sizeof(unsigned int));
+
+	if (!output) {
+		fprintf(stderr, __FILE__":%d Could not re-allocate %lu bytes for RLE runs\n",
+					__LINE__,
+					write_offset * sizeof(unsigned int));
+		exit(1);
+	}
+
+	*output_size = write_offset;
+	return output;
 }
 
 void process_rle_runs(unsigned int* input, unsigned int size) {
@@ -205,7 +224,6 @@ void process_rle_runs(unsigned int* input, unsigned int size) {
 		}
 	}
 	num_symbols++;
-//	printf("Num symbols %u\n", num_symbols);
 	unsigned int* symbol_frequencies = calloc(num_symbols, sizeof(unsigned int));
 
 	for (unsigned int i = 1; i < size ; i+= 2) {
@@ -219,9 +237,10 @@ void process_rle_runs(unsigned int* input, unsigned int size) {
 void main() {
 	unsigned int * pixels = read_tga();
 
-	unsigned int * rle_output = malloc(64000 * 2 * sizeof(unsigned int));
+	unsigned int * rle_output;
+	unsigned int num_runs;
 
-	unsigned int num_runs = find_rle_runs(rle_output, pixels, 64000);
+	rle_output = find_rle_runs(&num_runs, pixels, 64000);
 
 	process_rle_runs(rle_output, num_runs);
 
