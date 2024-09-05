@@ -85,17 +85,19 @@ void back_from_front() {
 	}
 }
 
-unsigned int* generate_huffman_table(unsigned int* input, unsigned int size) {
+unsigned int * generate_huffman_table(unsigned int * const output_size,
+			unsigned int const * const input,
+			unsigned int const input_size) {
 	// Count distinct symbols, which is the number of leaves in the tree
 	unsigned int distinct_symbols = 0;
-	for (unsigned int i = 0; i < size; i++) {
+	for (unsigned int i = 0; i < input_size; i++) {
 		if (input[i] > 0) {
 			distinct_symbols++;
 		}
 	}
 
-	printf("Generate Huffman table with %u symbols (%u distinct)\n",
-				size,
+	printf("Generating Huffman table for symbol range 0 to %u (%u distinct)\n",
+				input_size - 1,
 				distinct_symbols);
 
 /* The size numbers are wrong
@@ -138,7 +140,7 @@ unsigned int* generate_huffman_table(unsigned int* input, unsigned int size) {
 
 	// populate the table of values / weights with leaf values
 	unsigned int w = 0;
-	for (int i = 0; i < size; i++) {
+	for (int i = 0; i < input_size; i++) {
 		if (input[i] > 0) {
 			values[w] = i;
 			weights[w] = input[i];
@@ -161,9 +163,9 @@ unsigned int* generate_huffman_table(unsigned int* input, unsigned int size) {
 		}
 	}
 
-	for (int i = 0; i < distinct_symbols; i++) {
-		printf("Initial weight %u value %u\n", weights[i], values[i]);
-	}
+//	for (int i = 0; i < distinct_symbols; i++) {
+//		printf("Initial weight %u value %u\n", weights[i], values[i]);
+//	}
 
 	printf("Creating Huffman table with %u entries\n", 2 * (distinct_symbols - 1));
 	unsigned int* huffman = malloc(2 * (distinct_symbols - 1) * sizeof(unsigned int));
@@ -174,17 +176,17 @@ unsigned int* generate_huffman_table(unsigned int* input, unsigned int size) {
 		exit(1);
 	}
 
-	unsigned int next_node = size + distinct_symbols - 2;
+	unsigned int next_node = input_size + distinct_symbols - 2;
 
 	for (unsigned int j = 0; j < distinct_symbols - 1; j++) {
-		printf("Creating node %u from %u and %u, weight %u\n",
-					size + distinct_symbols - j - 2,
-					values[j],
-					values[j + 1],
-					weights[j] + weights[j + 1]);
+//		printf("Creating node %u from %u and %u, weight %u\n",
+//					input_size + distinct_symbols - j - 2,
+//					values[j],
+//					values[j + 1],
+//					weights[j] + weights[j + 1]);
 		huffman[2 * (distinct_symbols - 2 - j)] = values[j];
 		huffman[2 * (distinct_symbols - 2 - j) + 1] = values[j + 1];
-		values[j + 1] = size + distinct_symbols - j - 2;
+		values[j + 1] = input_size + distinct_symbols - j - 2;
 		weights[j + 1] += weights[j];
 		for (int i = j; i < distinct_symbols - 1; i++) {
 			if (weights[i] > weights[i + 1]) {
@@ -203,11 +205,13 @@ unsigned int* generate_huffman_table(unsigned int* input, unsigned int size) {
 	free(weights);
 
 	for (int i = 0; i < distinct_symbols - 1; i++) {
-		printf("Huffman node %u: children %u and %u\n",
-					i + size,
-					huffman[2 * i],
-					huffman [2 * i + 1]);
+//		printf("Huffman node %u: children %u and %u\n",
+//					i + input_size,
+//					huffman[2 * i],
+//					huffman [2 * i + 1]);
 	}
+	printf("Completed Huffman table with %u entries\n", 2 * (distinct_symbols - 1));
+	*output_size = 2 * (distinct_symbols - 1);
 	return huffman;
 }
 
@@ -280,7 +284,9 @@ void process_rle_runs(unsigned int* input, unsigned int size) {
 		symbol_frequencies[input[i]]++;
 	}
 
-	generate_huffman_table(symbol_frequencies, num_symbols);
+	unsigned int huffman_size;
+
+	generate_huffman_table(&huffman_size, symbol_frequencies, num_symbols);
 	free(symbol_frequencies);
 }
 
