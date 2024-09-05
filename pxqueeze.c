@@ -20,33 +20,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-unsigned char tga[192044];
-
-unsigned int pix_xy[320][200];
-
-unsigned int pix[64000];
+#include "read_tga.h"
 
 unsigned int pixmod[64000];
 
 unsigned int pixback[64000];
 
-unsigned char output[64000];
-
-unsigned char lzoutput[64000 * 6];
-
-int tgablue(int x, int y) {
-	return tga[18 + (x + y * 320) * 3];
-}
-
-int tgagreen(int x, int y) {
-	return tga[18 + (x + y * 320) * 3 + 1];
-}
-
-int tgared(int x, int y) {
-	return tga[18 + (x + y * 320) * 3 + 2];
-}
-
-void move_to_front() {
+void move_to_front(unsigned int* pix) {
 	int maxpix = 0;
 	for (int i = 0; i < 64000; i++) {
 		if (pix[i] > maxpix) {
@@ -239,25 +219,11 @@ void process_rle_runs(unsigned int* input, unsigned int size) {
 }
 
 void main() {
-	FILE* inputfile = fopen("out/gfx/jbq.tga", "rb");
-	fread(tga, 1, 192044, inputfile);
-	fclose(inputfile);
-
-	for (int y = 0; y < 200; y++) {
-		for (int x = 0; x < 320; x++) {
-			pix_xy[x][y] = (tgared(x, y) + tgagreen(x, y) + tgablue(x, y)) * 8 / 766;
-		}
-	}
-
-	for (int y = 0; y < 200; y++) {
-		for (int x = 0; x < 320; x++) {
-			pix[x + 320 * y] = pix_xy[x][y];
-		}
-	}
+	unsigned int * pixels = read_tga();
 
 	unsigned int * rle_output = malloc(64000 * sizeof(unsigned int));
 
-	unsigned int num_runs = find_rle_runs(rle_output, pix, 64000);
+	unsigned int num_runs = find_rle_runs(rle_output, pixels, 64000);
 
 	process_rle_runs(rle_output, num_runs);
 
