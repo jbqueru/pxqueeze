@@ -124,6 +124,7 @@ void generate_huffman_table(unsigned int* input, unsigned int size) {
 
 	printf("Generate Huffman table with %u symbols (%u distinct)\n", size, distinct_symbols);
 
+/* These numbers are wrong
 	printf("Dense Huffman table will have %u entries of %u bits each (%u total)\n",
 				distinct_symbols - 1, symbol_bits + 1,
 				(distinct_symbols - 1) * (symbol_bits + 1));
@@ -133,6 +134,7 @@ void generate_huffman_table(unsigned int* input, unsigned int size) {
 	printf("  plus a dictionary of %u entries of %u bits each (%u total)\n",
 				distinct_symbols, symbol_bits,
 				(distinct_symbols - 1) * (node_bits + 1) + distinct_symbols * symbol_bits);
+*/
 
 	unsigned int* values = calloc(distinct_symbols, sizeof(unsigned int));
 	unsigned int* weights = calloc(distinct_symbols, sizeof(unsigned int));
@@ -160,10 +162,38 @@ void generate_huffman_table(unsigned int* input, unsigned int size) {
 		}
 	}
 	for (int i = 0; i < distinct_symbols; i++) {
-		printf("weight %u value %u\n", weights[i], values[i]);
+		printf("Initial weight %u value %u\n", weights[i], values[i]);
 	}
 
-	printf("write node, left %u right %u\n", values[0], values[1]);
+	printf("initializing Huffman table with %u entries\n", 2 * (distinct_symbols - 1));
+	unsigned int* huffman = calloc(2 * (distinct_symbols - 1), sizeof(unsigned int));
+	unsigned int next_node = size + distinct_symbols - 2;
+
+	for (unsigned int j = 0; j < distinct_symbols - 1; j++) {
+		printf("Creating node %u from %u and %u\n", size + distinct_symbols - j - 2, values[j], values[j + 1]);
+		huffman[2 * (distinct_symbols - 2 - j)] = values[j];
+		huffman[2 * (distinct_symbols - 2 - j) + 1] = values[j + 1];
+		values[j + 1] = size + distinct_symbols - j - 2;
+		weights[j + 1] += weights[j];
+		for (int i = j; i < distinct_symbols - 1; i++) {
+			if (weights[i] > weights[i + 1]) {
+				unsigned int t;
+				t = weights[i];
+				weights[i] = weights[i + 1];
+				weights[i + 1] = t;
+				t = values[i];
+				values[i] = values[i + 1];
+				values[i + 1] = t;
+			}
+		}
+		for (int i = j + 1; i < distinct_symbols; i++) {
+			printf("weight %u value %u\n", weights[i], values[i]);
+		}
+	}
+
+	free(values);
+	free(weights);
+	free(huffman);
 }
 
 unsigned int find_rle_runs(unsigned int* output,
