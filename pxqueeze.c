@@ -167,7 +167,7 @@ void generate_huffman_table(unsigned int* input, unsigned int size) {
 			}
 		}
 		for (int i = j + 1; i < distinct_symbols; i++) {
-			printf("weight %u value %u\n", weights[i], values[i]);
+//			printf("weight %u value %u\n", weights[i], values[i]);
 		}
 	}
 
@@ -176,26 +176,24 @@ void generate_huffman_table(unsigned int* input, unsigned int size) {
 	free(huffman);
 }
 
-unsigned int find_rle_runs(unsigned int* output,
-			unsigned int* input,
-			unsigned int size) {
+unsigned int find_rle_runs(unsigned int * output,
+			unsigned int const * const input_data,
+			unsigned int const input_size) {
 	unsigned int read_offset = 0;
 	unsigned int write_offset = 0;
 	unsigned int current_value;
 	unsigned int current_length;
 
-	while (read_offset < size) {
-		current_value = input[read_offset++];
+	while (read_offset < input_size) {
+		current_value = input_data[read_offset++];
 		current_length = 1;
-		while (read_offset < size && input[read_offset] == current_value) {
+		while (read_offset < input_size && input_data[read_offset] == current_value) {
 			read_offset++;
 			current_length++;
 		}
-//		printf("found run, %u instances of symbol %u\n", current_length, current_value);
 		output[write_offset++] = current_length;
 		output[write_offset++] = current_value;
 	}
-//	printf("total runs: %u\n", write_offset / 2);
 	return write_offset;
 }
 
@@ -221,7 +219,7 @@ void process_rle_runs(unsigned int* input, unsigned int size) {
 void main() {
 	unsigned int * pixels = read_tga();
 
-	unsigned int * rle_output = malloc(64000 * sizeof(unsigned int));
+	unsigned int * rle_output = malloc(64000 * 2 * sizeof(unsigned int));
 
 	unsigned int num_runs = find_rle_runs(rle_output, pixels, 64000);
 
