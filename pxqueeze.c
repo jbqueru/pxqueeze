@@ -22,13 +22,13 @@
 
 unsigned char tga[192044];
 
-int pix_xy[320][200];
+unsigned int pix_xy[320][200];
 
-int pix[64000];
+unsigned int pix[64000];
 
-int pixmod[64000];
+unsigned int pixmod[64000];
 
-int pixback[64000];
+unsigned int pixback[64000];
 
 unsigned char output[64000];
 
@@ -104,6 +104,110 @@ void back_from_front() {
 	}
 }
 
+void generate_huffman_table(unsigned int* input, unsigned int size) {
+	unsigned int distinct_symbols = 0;
+	for (unsigned int i = 0; i < size; i++) {
+		if (input[i] > 0) {
+			distinct_symbols++;
+		}
+	}
+
+	unsigned int symbol_bits = 0;
+	while(size > 1U << symbol_bits) {
+		symbol_bits++;
+	}
+
+	unsigned int node_bits = 0;
+	while(distinct_symbols > 1U << node_bits) {
+		node_bits++;
+	}
+
+	printf("Generate Huffman table with %u symbols (%u distinct)\n", size, distinct_symbols);
+
+	printf("Dense Huffman table will have %u entries of %u bits each (%u total)\n",
+				distinct_symbols - 1, symbol_bits + 1,
+				(distinct_symbols - 1) * (symbol_bits + 1));
+
+	printf("Sparse Huffman table will have %u entries of %u bits each,\n",
+				distinct_symbols - 1, node_bits + 1);
+	printf("  plus a dictionary of %u entries of %u bits each (%u total)\n",
+				distinct_symbols, symbol_bits,
+				(distinct_symbols - 1) * (node_bits + 1) + distinct_symbols * symbol_bits);
+
+	unsigned int* values = calloc(distinct_symbols, sizeof(unsigned int));
+	unsigned int* weights = calloc(distinct_symbols, sizeof(unsigned int));
+
+	unsigned int w = 0;
+	for (int i = 0; i < size; i++) {
+		if (input[i] > 0) {
+			values[w] = i;
+			weights[w] = input[i];
+			w++;
+		}
+	}
+
+	for (int j = 0; j < distinct_symbols - 1; j++) {
+		for (int i = 0; i < distinct_symbols - 1; i++) {
+			if (weights[i] > weights[i + 1]) {
+				unsigned int t;
+				t = weights[i];
+				weights[i] = weights[i + 1];
+				weights[i + 1] = t;
+				t = values[i];
+				values[i] = values[i + 1];
+				values[i + 1] = t;
+			}
+		}
+	}
+	for (int i = 0; i < distinct_symbols; i++) {
+		printf("weight %u value %u\n", weights[i], values[i]);
+	}
+
+	printf("write node, left %u right %u\n", values[0], values[1]);
+}
+
+unsigned int find_rle_runs(unsigned int* output,
+			unsigned int* input,
+			unsigned int size) {
+	unsigned int read_offset = 0;
+	unsigned int write_offset = 0;
+	unsigned int current_value;
+	unsigned int current_length;
+
+	while (read_offset < size) {
+		current_value = input[read_offset++];
+		current_length = 1;
+		while (read_offset < size && input[read_offset] == current_value) {
+			read_offset++;
+			current_length++;
+		}
+//		printf("found run, %u instances of symbol %u\n", current_length, current_value);
+		output[write_offset++] = current_length;
+		output[write_offset++] = current_value;
+	}
+//	printf("total runs: %u\n", write_offset / 2);
+	return write_offset;
+}
+
+void process_rle_runs(unsigned int* input, unsigned int size) {
+	unsigned int num_symbols = 0;
+	for (unsigned int i = 1; i < size ; i+= 2) {
+		if (input[i] > num_symbols) {
+			num_symbols = input[i];
+		}
+	}
+	num_symbols++;
+//	printf("Num symbols %u\n", num_symbols);
+	unsigned int* symbol_frequencies = calloc(num_symbols, sizeof(unsigned int));
+
+	for (unsigned int i = 1; i < size ; i+= 2) {
+		symbol_frequencies[input[i]]++;
+	}
+
+	generate_huffman_table(symbol_frequencies, num_symbols);
+	free(symbol_frequencies);
+}
+
 void main() {
 	FILE* inputfile = fopen("out/gfx/jbq.tga", "rb");
 	fread(tga, 1, 192044, inputfile);
@@ -121,6 +225,16 @@ void main() {
 		}
 	}
 
+	unsigned int * rle_output = malloc(64000 * sizeof(unsigned int));
+
+	unsigned int num_runs = find_rle_runs(rle_output, pix, 64000);
+
+	process_rle_runs(rle_output, num_runs);
+
+	free(rle_output);
+
+
+/*
 	for (int n = 0; n < 64000; n++) {
 		output[n] = pix[n];
 	}
@@ -148,6 +262,7 @@ void main() {
 	outputfile = fopen("out/gfx/mtfback.bin", "wb");
 	fwrite(output, 1, 64000, outputfile);
 	fclose(outputfile);
+*/
 
 /*	int s = 0;
 
