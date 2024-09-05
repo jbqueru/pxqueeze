@@ -112,6 +112,9 @@ void generate_huffman_table(unsigned int* input, unsigned int size) {
 		}
 	}
 
+	printf("Generate Huffman table with %u symbols (%u distinct)\n", size, distinct_symbols);
+
+/* The size numbers are wrong
 	unsigned int symbol_bits = 0;
 	while(size > 1U << symbol_bits) {
 		symbol_bits++;
@@ -122,9 +125,6 @@ void generate_huffman_table(unsigned int* input, unsigned int size) {
 		node_bits++;
 	}
 
-	printf("Generate Huffman table with %u symbols (%u distinct)\n", size, distinct_symbols);
-
-/* These numbers are wrong
 	printf("Dense Huffman table will have %u entries of %u bits each (%u total)\n",
 				distinct_symbols - 1, symbol_bits + 1,
 				(distinct_symbols - 1) * (symbol_bits + 1));
