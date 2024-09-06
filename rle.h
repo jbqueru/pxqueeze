@@ -17,15 +17,20 @@
 
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-void find_rle_runs(
-	unsigned int ** const output_lengths,
-	unsigned int ** const output_values,
+#ifndef __RLE_H__
+#define __RLE_H__
+
+void rle_find_runs(
+	unsigned int const ** const output_lengths,
+	unsigned int const ** const output_values,
 	unsigned int * const output_size,
 	unsigned int const * const input_data,
 	unsigned int const input_size,
 	unsigned int const max_run_length);
 
-void process_rle_runs(
-	unsigned int * rle_lengths,
-	unsigned int * rle_values,
-	unsigned int size);
+void rle_process_runs(
+	unsigned int const * const rle_lengths,
+	unsigned int const * const rle_values,
+	unsigned int const size);
+
+#endif

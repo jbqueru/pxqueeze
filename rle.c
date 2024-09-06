@@ -22,10 +22,11 @@
 #include <string.h>
 
 #include "huffman.h"
+#include "rle.h"
 
-void find_rle_runs(
-			unsigned int ** const output_lengths,
-			unsigned int ** const output_values,
+void rle_find_runs(
+			unsigned int const ** const output_lengths,
+			unsigned int const ** const output_values,
 			unsigned int * const output_size,
 			unsigned int const * const input_data,
 			unsigned int const input_size,
@@ -93,9 +94,9 @@ void find_rle_runs(
 	printf("Found %u RLE runs\n", write_offset);
 }
 
-void process_rle_runs(unsigned int * rle_lengths,
-				unsigned int * rle_values,
-				unsigned int size) {
+void rle_process_runs(unsigned int const * const rle_lengths,
+				unsigned int const * const rle_values,
+				unsigned int const size) {
 	unsigned int symbols_huffman_size;
 	unsigned int * symbols_huffman_table;
 	unsigned int num_symbols;

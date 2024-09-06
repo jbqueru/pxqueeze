@@ -24,19 +24,21 @@
 #include "rle.h"
 #include "tga.h"
 
-void main() {
+int main(int argc, char* argv[]) {
 	unsigned int * pixels = tga_read();
 
-	unsigned int * rle_lengths;
-	unsigned int * rle_values;
+	unsigned int const * rle_lengths;
+	unsigned int const * rle_values;
 	unsigned int num_runs;
 
-	find_rle_runs(&rle_lengths, &rle_values, &num_runs, pixels, 64000, 100);
+	rle_find_runs(&rle_lengths, &rle_values, &num_runs, pixels, 64000, 100);
 
-	free(pixels);
+	free((void*)pixels);
 
-	process_rle_runs(rle_lengths, rle_values, num_runs);
+	rle_process_runs(rle_lengths, rle_values, num_runs);
 
-	free(rle_lengths);
-	free(rle_values);
+	free((void*)rle_lengths);
+	free((void*)rle_values);
+
+	return 0;
 }
