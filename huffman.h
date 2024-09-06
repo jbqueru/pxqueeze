@@ -21,5 +21,6 @@ unsigned int * generate_huffman_table(unsigned int * const output_size,
 			unsigned int const * const input,
 			unsigned int const input_size);
 
-void generate_huffman_codes(unsigned int const * const huffman_table,
+void generate_huffman_codes(char** codes,
+			unsigned int const * const huffman_table,
 			unsigned int const num_symbols);

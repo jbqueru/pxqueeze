@@ -160,7 +160,14 @@ void process_rle_runs(unsigned int* input, unsigned int size) {
 
 	huffman_table = generate_huffman_table(&huffman_size, symbol_frequencies, num_symbols);
 
-	generate_huffman_codes(huffman_table, num_symbols);
+	char** codes = malloc(num_symbols * sizeof(char*));
+	memset(codes, 0, num_symbols * sizeof(char*));
+
+	generate_huffman_codes(codes, huffman_table, num_symbols);
+
+	for (int i = 0; i < num_symbols; i++) {
+		printf("Symbol %u has code %s\n", i, codes[i]);
+	}
 
 	free(symbol_frequencies);
 }

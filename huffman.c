@@ -151,7 +151,8 @@ unsigned int * generate_huffman_table(unsigned int * const output_size,
 	return huffman;
 }
 
-static void codes_inner(unsigned int const * const huffman_table,
+static void codes_inner(char** codes,
+			unsigned int const * const huffman_table,
 			unsigned int const num_symbols,
 			unsigned int node,
 			char * prefix) {
@@ -160,20 +161,23 @@ static void codes_inner(unsigned int const * const huffman_table,
 	prefix1 = realloc(prefix1, strlen(prefix1) + 2);
 	strcat(prefix1, "0");
 	if (huffman_table[2 * node] >= num_symbols) {
-		codes_inner(huffman_table, num_symbols, huffman_table[2 * node] - num_symbols, prefix1);
+		codes_inner(codes, huffman_table, num_symbols, huffman_table[2 * node] - num_symbols, prefix1);
 	} else {
-		printf("Symbol %u has code [%s]\n", huffman_table[2 * node], prefix1);
+		printf("Outputing code %s for symbol %u\n", prefix1, huffman_table[2 * node]);
+		codes[huffman_table[2 * node]] = prefix1;
 	}
 	prefix = realloc(prefix, strlen(prefix) + 2);
 	strcat(prefix, "1");
 	if (huffman_table[2 * node + 1] >= num_symbols) {
-		codes_inner(huffman_table, num_symbols, huffman_table[2 * node + 1] - num_symbols, prefix);
+		codes_inner(codes, huffman_table, num_symbols, huffman_table[2 * node + 1] - num_symbols, prefix);
 	} else {
-		printf("Symbol %u has code [%s]\n", huffman_table[2 * node + 1], prefix);
+		printf("Outputing code %s for symbol %u\n", prefix, huffman_table[2 * node + 1]);
+		codes[huffman_table[2 * node + 1]] = prefix;
 	}
 }
 
-void generate_huffman_codes(unsigned int const * const huffman_table,
+void generate_huffman_codes(char** codes,
+			unsigned int const * const huffman_table,
 			unsigned int const num_symbols) {
-	codes_inner(huffman_table, num_symbols, 0, strdup(""));
+	codes_inner(codes, huffman_table, num_symbols, 0, strdup(""));
 }
