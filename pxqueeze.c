@@ -130,84 +130,37 @@ unsigned int* find_rle_runs(unsigned int * const output_size,
 }
 
 void process_rle_runs(unsigned int* input, unsigned int size) {
-	unsigned int num_symbols = 0;
-	for (unsigned int i = 1; i < size ; i+= 2) {
-		if (input[i] > num_symbols) {
-			num_symbols = input[i];
-		}
-	}
-	printf("Symbols in RLE runs range from 0 to %u\n", num_symbols);
-
-	num_symbols++;
-
-	unsigned int* symbol_frequencies = malloc(num_symbols * sizeof(unsigned int));
-
-	if (!symbol_frequencies) {
-		fprintf(stderr, __FILE__":%d Could not allocate %lu bytes for symbol frequencies\n",
-					__LINE__,
-					num_symbols * sizeof(unsigned int));
-		exit(1);
-	}
-
-	memset(symbol_frequencies, 0, num_symbols * sizeof(unsigned int));
-
-	for (unsigned int i = 1; i < size ; i+= 2) {
-		symbol_frequencies[input[i]]++;
-	}
-
 	unsigned int symbols_huffman_size;
 	unsigned int * symbols_huffman_table;
+	unsigned int num_symbols;
 
-	symbols_huffman_table = generate_huffman_table(&symbols_huffman_size, symbol_frequencies, num_symbols);
+	symbols_huffman_table = generate_huffman_table(&symbols_huffman_size, &num_symbols, input + 1, 2, size / 2);
 
-	char** symbol_codes = malloc(num_symbols * sizeof(char*));
-	memset(symbol_codes, 0, num_symbols * sizeof(char*));
+	char** symbol_codes;
 
-	generate_huffman_codes(symbol_codes, symbols_huffman_table, num_symbols);
+	symbol_codes = generate_huffman_codes(symbols_huffman_table, num_symbols);
 
 	for (int i = 0; i < num_symbols; i++) {
-		printf("Symbol %u has code %s\n", i, symbol_codes[i]);
-	}
-
-	unsigned int num_lengths = 0;
-	for (unsigned int i = 0; i < size ; i+= 2) {
-		if (input[i] > num_lengths) {
-			num_lengths = input[i];
+		if (symbol_codes[i]) {
+			printf("Symbol %u has code %s\n", i, symbol_codes[i]);
 		}
-	}
-	printf("lengths in RLE runs range from 0 to %u\n", num_lengths);
-
-	num_lengths++;
-
-	unsigned int* length_frequencies = malloc(num_lengths * sizeof(unsigned int));
-
-	if (!length_frequencies) {
-		fprintf(stderr, __FILE__":%d Could not allocate %lu bytes for length frequencies\n",
-					__LINE__,
-					num_lengths * sizeof(unsigned int));
-		exit(1);
-	}
-
-	memset(length_frequencies, 0, num_lengths * sizeof(unsigned int));
-
-	for (unsigned int i = 0; i < size ; i+= 2) {
-		length_frequencies[input[i]]++;
 	}
 
 	unsigned int lengths_huffman_size;
 	unsigned int * lengths_huffman_table;
+	unsigned int num_lengths;
 
-	lengths_huffman_table = generate_huffman_table(&lengths_huffman_size, length_frequencies, num_lengths);
+	lengths_huffman_table = generate_huffman_table(&lengths_huffman_size, &num_lengths, input, 2, size / 2);
 
-	char** length_codes = malloc(num_lengths * sizeof(char*));
-	memset(length_codes, 0, num_lengths * sizeof(char*));
+	char** length_codes;
 
-	generate_huffman_codes(length_codes, lengths_huffman_table, num_lengths);
+	length_codes = generate_huffman_codes(lengths_huffman_table, num_lengths);
 
 	for (unsigned int i = 0; i < num_lengths; i++) {
-		printf("length %u has code %s\n", i, length_codes[i]);
+		if (length_codes[i]) {
+			printf("length %u has code %s\n", i, length_codes[i]);
+		}
 	}
-
 	unsigned int output_bits = 0;
 
 	for (unsigned i = 0; i < size; i += 2) {
@@ -224,6 +177,38 @@ void process_rle_runs(unsigned int* input, unsigned int size) {
 
 void main() {
 	unsigned int * pixels = read_tga();
+
+/*
+	unsigned char * pi1 = malloc(32034);
+	memset(pi1, 0, 32034);
+
+	for (unsigned int i = 0; i < 64000; i += 16) {
+		unsigned short int p1, p2, p3, p4;
+		p1 = p2 = p3 = p4 = 0;
+		for (unsigned int j = 0; j < 16; j++) {
+			p1 >>= 1;
+			p2 >>= 1;
+			p3 >>= 1;
+			p4 >>= 1;
+			if (pixels[i + j] & 1) p1 += 32768;
+			if (pixels[i + j] & 2) p2 += 32768;
+			if (pixels[i + j] & 4) p3 += 32768;
+			if (pixels[i + j] & 8) p4 += 32768;
+		}
+		pi1[34 + i / 2] = (p1 & 0xff00) >> 8;
+		pi1[34 + i / 2 + 1] = p1 & 0xff;
+		pi1[34 + i / 2 + 2] = (p2 & 0xff00) >> 8;
+		pi1[34 + i / 2 + 3] = p2 & 0xff;
+		pi1[34 + i / 2 + 4] = (p3 & 0xff00) >> 8;
+		pi1[34 + i / 2 + 5] = p3 & 0xff;
+		pi1[34 + i / 2 + 6] = (p4 & 0xff00) >> 8;
+		pi1[34 + i / 2 + 7] = p4 & 0xff;
+	}
+	FILE* pi1file = fopen("out/gfx/test.pi1", "wb");
+	fwrite(pi1, 1, 32034, pi1file);
+	fclose(pi1file);
+	free(pi1);
+*/
 
 	unsigned int * rle_output;
 	unsigned int num_runs;
