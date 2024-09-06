@@ -156,8 +156,12 @@ void process_rle_runs(unsigned int* input, unsigned int size) {
 	}
 
 	unsigned int huffman_size;
+	unsigned int * huffman_table;
 
-	generate_huffman_table(&huffman_size, symbol_frequencies, num_symbols);
+	huffman_table = generate_huffman_table(&huffman_size, symbol_frequencies, num_symbols);
+
+	generate_huffman_codes(huffman_table, num_symbols);
+
 	free(symbol_frequencies);
 }
 

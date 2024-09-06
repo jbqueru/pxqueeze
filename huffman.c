@@ -150,3 +150,30 @@ unsigned int * generate_huffman_table(unsigned int * const output_size,
 	*output_size = 2 * (distinct_symbols - 1);
 	return huffman;
 }
+
+static void codes_inner(unsigned int const * const huffman_table,
+			unsigned int const num_symbols,
+			unsigned int node,
+			char * prefix) {
+	printf("Processing node %u with prefix [%s]\n", node + num_symbols, prefix);
+	char * prefix1 = strdup(prefix);
+	prefix1 = realloc(prefix1, strlen(prefix1) + 2);
+	strcat(prefix1, "0");
+	if (huffman_table[2 * node] >= num_symbols) {
+		codes_inner(huffman_table, num_symbols, huffman_table[2 * node] - num_symbols, prefix1);
+	} else {
+		printf("Symbol %u has code [%s]\n", huffman_table[2 * node], prefix1);
+	}
+	prefix = realloc(prefix, strlen(prefix) + 2);
+	strcat(prefix, "1");
+	if (huffman_table[2 * node + 1] >= num_symbols) {
+		codes_inner(huffman_table, num_symbols, huffman_table[2 * node + 1] - num_symbols, prefix);
+	} else {
+		printf("Symbol %u has code [%s]\n", huffman_table[2 * node + 1], prefix);
+	}
+}
+
+void generate_huffman_codes(unsigned int const * const huffman_table,
+			unsigned int const num_symbols) {
+	codes_inner(huffman_table, num_symbols, 0, strdup(""));
+}
