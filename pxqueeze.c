@@ -26,7 +26,8 @@
 
 unsigned int* find_rle_runs(unsigned int * const output_size,
 			unsigned int const * const input_data,
-			unsigned int const input_size) {
+			unsigned int const input_size,
+			unsigned int const max_run_length) {
 	unsigned int read_offset = 0;
 	unsigned int write_offset = 0;
 	unsigned int current_value;
@@ -46,7 +47,9 @@ unsigned int* find_rle_runs(unsigned int * const output_size,
 	while (read_offset < input_size) {
 		current_value = input_data[read_offset++];
 		current_length = 1;
-		while (read_offset < input_size && input_data[read_offset] == current_value) {
+		while (read_offset < input_size
+					&& input_data[read_offset] == current_value
+					&& current_length < max_run_length) {
 			read_offset++;
 			current_length++;
 		}
@@ -119,7 +122,7 @@ void main() {
 	unsigned int * rle_output;
 	unsigned int num_runs;
 
-	rle_output = find_rle_runs(&num_runs, pixels, 64000);
+	rle_output = find_rle_runs(&num_runs, pixels, 64000, 100);
 
 	process_rle_runs(rle_output, num_runs);
 
