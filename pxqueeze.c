@@ -116,38 +116,6 @@ void process_rle_runs(unsigned int* input, unsigned int size) {
 void main() {
 	unsigned int * pixels = read_tga();
 
-/*
-	unsigned char * pi1 = malloc(32034);
-	memset(pi1, 0, 32034);
-
-	for (unsigned int i = 0; i < 64000; i += 16) {
-		unsigned short int p1, p2, p3, p4;
-		p1 = p2 = p3 = p4 = 0;
-		for (unsigned int j = 0; j < 16; j++) {
-			p1 >>= 1;
-			p2 >>= 1;
-			p3 >>= 1;
-			p4 >>= 1;
-			if (pixels[i + j] & 1) p1 += 32768;
-			if (pixels[i + j] & 2) p2 += 32768;
-			if (pixels[i + j] & 4) p3 += 32768;
-			if (pixels[i + j] & 8) p4 += 32768;
-		}
-		pi1[34 + i / 2] = (p1 & 0xff00) >> 8;
-		pi1[34 + i / 2 + 1] = p1 & 0xff;
-		pi1[34 + i / 2 + 2] = (p2 & 0xff00) >> 8;
-		pi1[34 + i / 2 + 3] = p2 & 0xff;
-		pi1[34 + i / 2 + 4] = (p3 & 0xff00) >> 8;
-		pi1[34 + i / 2 + 5] = p3 & 0xff;
-		pi1[34 + i / 2 + 6] = (p4 & 0xff00) >> 8;
-		pi1[34 + i / 2 + 7] = p4 & 0xff;
-	}
-	FILE* pi1file = fopen("out/gfx/test.pi1", "wb");
-	fwrite(pi1, 1, 32034, pi1file);
-	fclose(pi1file);
-	free(pi1);
-*/
-
 	unsigned int * rle_output;
 	unsigned int num_runs;
 
