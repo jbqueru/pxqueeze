@@ -24,68 +24,6 @@
 #include "huffman.h"
 #include "read_tga.h"
 
-unsigned int pixmod[64000];
-
-unsigned int pixback[64000];
-
-void move_to_front(unsigned int* pix) {
-	int maxpix = 0;
-	for (int i = 0; i < 64000; i++) {
-		if (pix[i] > maxpix) {
-			maxpix = pix[i];
-		}
-	}
-	printf("Max pixel value: %d\n", maxpix);
-
-	int* values = malloc((maxpix + 1) * sizeof(int));
-	for (int v = 0; v <= maxpix ; v++) {
-		values[v] = v;
-	}
-
-	for (int i = 0; i < 64000; i++) {
-		int c = 0;
-		for (int v = 0 ; v <= maxpix ; v++) {
-			if (pix[i] == values[v]) {
-				if (v > 0) {
-					values[0] = values[v];
-					values[v] = c;
-				}
-				pixmod[i] = v;
-				break;
-			}
-			int cc = values[v];
-			values[v] = c;
-			c = cc;
-		}
-	}
-}
-
-void back_from_front() {
-	int maxpix = 0;
-	for (int i = 0; i < 64000; i++) {
-		if (pixmod[i] > maxpix) {
-			maxpix = pixmod[i];
-		}
-	}
-	printf("Max offset value: %d\n", maxpix);
-
-	int* values = malloc((maxpix + 1) * sizeof(int));
-	for (int v = 0; v <= maxpix ; v++) {
-		values[v] = v;
-	}
-
-	for (int i = 0; i < 64000; i++) {
-		pixback[i] = values[pixmod[i]];
-		if (pixmod[i] > 0) {
-			int c = values[pixmod[i]];
-			for (int v = pixmod[i] - 1; v >= 0; v--) {
-				values[v + 1] = values[v];
-			}
-			values[0] = c;
-		}
-	}
-}
-
 unsigned int* find_rle_runs(unsigned int * const output_size,
 			unsigned int const * const input_data,
 			unsigned int const input_size) {
