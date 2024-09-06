@@ -24,7 +24,10 @@
 #include "huffman.h"
 #include "read_tga.h"
 
-unsigned int* find_rle_runs(unsigned int * const output_size,
+void find_rle_runs(
+			unsigned int ** const output_lengths,
+			unsigned int ** const output_values,
+			unsigned int * const output_size,
 			unsigned int const * const input_data,
 			unsigned int const input_size,
 			unsigned int const max_run_length) {
@@ -35,12 +38,21 @@ unsigned int* find_rle_runs(unsigned int * const output_size,
 
 	printf("Looking for RLE runs from %u symbols\n", input_size);
 
-	unsigned int * output = malloc(input_size * 2 * sizeof(unsigned int));
+	unsigned int * lengths = malloc(input_size * sizeof(unsigned int));
 
-	if (!output) {
-		fprintf(stderr, __FILE__":%d Could not allocate %lu bytes for RLE runs\n",
+	if (!lengths) {
+		fprintf(stderr, __FILE__":%d Could not allocate %lu bytes for RLE lengths\n",
 					__LINE__,
-					input_size * 2 * sizeof(unsigned int));
+					input_size * sizeof(unsigned int));
+		exit(1);
+	}
+
+	unsigned int * values = malloc(input_size * sizeof(unsigned int));
+
+	if (!lengths) {
+		fprintf(stderr, __FILE__":%d Could not allocate %lu bytes for RLE values\n",
+					__LINE__,
+					input_size * sizeof(unsigned int));
 		exit(1);
 	}
 
@@ -53,29 +65,43 @@ unsigned int* find_rle_runs(unsigned int * const output_size,
 			read_offset++;
 			current_length++;
 		}
-		output[write_offset++] = current_length;
-		output[write_offset++] = current_value;
+		lengths[write_offset] = current_length;
+		values[write_offset] = current_value;
+		write_offset++;
 	}
-	output = realloc(output, write_offset * sizeof(unsigned int));
 
-	if (!output) {
-		fprintf(stderr, __FILE__":%d Could not re-allocate %lu bytes for RLE runs\n",
+	lengths = realloc(lengths, write_offset * sizeof(unsigned int));
+
+	if (!lengths) {
+		fprintf(stderr, __FILE__":%d Could not re-allocate %lu bytes for RLE lengths\n",
 					__LINE__,
 					write_offset * sizeof(unsigned int));
 		exit(1);
 	}
 
+	values = realloc(values, write_offset * sizeof(unsigned int));
+
+	if (!values) {
+		fprintf(stderr, __FILE__":%d Could not re-allocate %lu bytes for RLE values\n",
+					__LINE__,
+					write_offset * sizeof(unsigned int));
+		exit(1);
+	}
+
+	*output_lengths = lengths;
+	*output_values = values;
 	*output_size = write_offset;
-	printf("Found %u RLE runs\n", write_offset / 2);
-	return output;
+	printf("Found %u RLE runs\n", write_offset);
 }
 
-void process_rle_runs(unsigned int* input, unsigned int size) {
+void process_rle_runs(unsigned int * rle_lengths,
+				unsigned int * rle_values,
+				unsigned int size) {
 	unsigned int symbols_huffman_size;
 	unsigned int * symbols_huffman_table;
 	unsigned int num_symbols;
 
-	symbols_huffman_table = generate_huffman_table(&symbols_huffman_size, &num_symbols, input + 1, 2, size / 2);
+	symbols_huffman_table = generate_huffman_table(&symbols_huffman_size, &num_symbols, rle_values, 1, size);
 
 	char** symbol_codes;
 
@@ -91,7 +117,7 @@ void process_rle_runs(unsigned int* input, unsigned int size) {
 	unsigned int * lengths_huffman_table;
 	unsigned int num_lengths;
 
-	lengths_huffman_table = generate_huffman_table(&lengths_huffman_size, &num_lengths, input, 2, size / 2);
+	lengths_huffman_table = generate_huffman_table(&lengths_huffman_size, &num_lengths, rle_lengths, 1, size);
 
 	char** length_codes;
 
@@ -104,13 +130,13 @@ void process_rle_runs(unsigned int* input, unsigned int size) {
 	}
 	unsigned int output_bits = 0;
 
-	for (unsigned i = 0; i < size; i += 2) {
+	for (unsigned i = 0; i < size; i++) {
 /*		printf("Run length %u symbol %u stored in %u+%u bits\n",
 					input[i], input[i+1],
 					(unsigned int)strlen(length_codes[input[i]]),
 					(unsigned int)strlen(symbol_codes[input[i+1]]));*/
-		output_bits += (unsigned int)strlen(length_codes[input[i]])
-					+ (unsigned int)strlen(symbol_codes[input[i+1]]);
+		output_bits += (unsigned int)strlen(length_codes[rle_lengths[i]])
+					+ (unsigned int)strlen(symbol_codes[rle_values[i]]);
 	}
 	printf("Total output size %u bits (= %u bytes)\n", output_bits, (output_bits + 7) / 8);
 
@@ -119,12 +145,14 @@ void process_rle_runs(unsigned int* input, unsigned int size) {
 void main() {
 	unsigned int * pixels = read_tga();
 
-	unsigned int * rle_output;
+	unsigned int * rle_lengths;
+	unsigned int * rle_values;
 	unsigned int num_runs;
 
-	rle_output = find_rle_runs(&num_runs, pixels, 64000, 100);
+	find_rle_runs(&rle_lengths, &rle_values, &num_runs, pixels, 64000, 100);
 
-	process_rle_runs(rle_output, num_runs);
+	process_rle_runs(rle_lengths, rle_values, num_runs);
 
-	free(rle_output);
+	free(rle_lengths);
+	free(rle_values);
 }
