@@ -124,48 +124,4 @@ void main() {
 	process_rle_runs(rle_output, num_runs);
 
 	free(rle_output);
-
-
-
-/*	int s = 0;
-
-	for (int target = 0; target < 64000; target++) {
-		int beststart = 0;
-		int bestlength = 0;
-		for (int start = 0; start < target; start++) {
-			int length;
-			for (length = 0; length < 64000 - target; length++) {
-				if (pix[start + length] != pix[target + length]) {
-					break;
-				}
-				if (length >= bestlength) {
-					bestlength = length;
-					beststart = start;
-				}
-			}
-		}
-		if (bestlength == 0) {
-//			printf("no match found for %d\n", target);
-		} else {
-			if (target + bestlength == 64000) {
-//				printf("input overflow\n");
-				bestlength--;
-			}
-//			printf("found match of %d pixels at %d for %d\n", bestlength, beststart, target);
-		}
-
-		lzoutput[s++] = bestlength >> 8;
-		lzoutput[s++] = bestlength % 256;
-		lzoutput[s++] = beststart >> 8;
-		lzoutput[s++] = beststart % 256;
-		lzoutput[s++] = pix[target + bestlength];
-		s++;
-
-		target += bestlength;
-	}
-
-	FILE* lzfile = fopen("out/gfx/lz.bin", "wb");
-	fwrite(lzoutput, 1, s, lzfile);
-	fclose(lzfile);
-*/
 }
