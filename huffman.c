@@ -176,8 +176,8 @@ unsigned int * generate_huffman_table(
 //					huffman[2 * i],
 //					huffman [2 * i + 1]);
 	}
-	printf("Completed Huffman table with %u entries\n", 2 * (distinct_symbols - 1));
-	*output_size = 2 * (distinct_symbols - 1);
+	printf("Completed Huffman table with %u nodes\n", (distinct_symbols - 1));
+	*output_size = (distinct_symbols - 1);
 	return huffman;
 }
 
