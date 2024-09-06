@@ -22,7 +22,6 @@
 #include <string.h>
 
 #include "huffman.h"
-#include "read_tga.h"
 
 void find_rle_runs(
 			unsigned int ** const output_lengths,

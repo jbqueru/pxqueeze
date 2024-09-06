@@ -23,7 +23,7 @@
 
 #include "huffman.h"
 #include "rle.h"
-#include "read_tga.h"
+#include "tga.h"
 
 void main() {
 	unsigned int * pixels = read_tga();

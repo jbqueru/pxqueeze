@@ -21,7 +21,8 @@ mkdir -p out/bin
 mkdir -p out/gfx
 mkdir -p out/tos
 
-cc pxqueeze.c huffman.c rle.c read_tga.c -o out/bin/pxqueeze
+rm -f out/bin/pxqueeze
+cc pxqueeze.c huffman.c rle.c tga.c -o out/bin/pxqueeze
 out/bin/pxqueeze
 
 # ~/code/rmac/rmac -s -v -p -4 src/pxq_test.s -o out/tos/PXQ.PRG
