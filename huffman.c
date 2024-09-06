@@ -186,14 +186,14 @@ static void codes_inner(char** codes,
 			unsigned int const num_symbols,
 			unsigned int node,
 			char * prefix) {
-	printf("Processing node %u with prefix [%s]\n", node + num_symbols, prefix);
+//	printf("Processing node %u with prefix [%s]\n", node + num_symbols, prefix);
 	char * prefix1 = strdup(prefix);
 	prefix1 = realloc(prefix1, strlen(prefix1) + 2);
 	strcat(prefix1, "0");
 	if (huffman_table[2 * node] >= num_symbols) {
 		codes_inner(codes, huffman_table, num_symbols, huffman_table[2 * node] - num_symbols, prefix1);
 	} else {
-		printf("Outputing code %s for symbol %u\n", prefix1, huffman_table[2 * node]);
+//		printf("Outputing code %s for symbol %u\n", prefix1, huffman_table[2 * node]);
 		codes[huffman_table[2 * node]] = prefix1;
 	}
 	prefix = realloc(prefix, strlen(prefix) + 2);
@@ -201,7 +201,7 @@ static void codes_inner(char** codes,
 	if (huffman_table[2 * node + 1] >= num_symbols) {
 		codes_inner(codes, huffman_table, num_symbols, huffman_table[2 * node + 1] - num_symbols, prefix);
 	} else {
-		printf("Outputing code %s for symbol %u\n", prefix, huffman_table[2 * node + 1]);
+//		printf("Outputing code %s for symbol %u\n", prefix, huffman_table[2 * node + 1]);
 		codes[huffman_table[2 * node + 1]] = prefix;
 	}
 }
