@@ -155,21 +155,71 @@ void process_rle_runs(unsigned int* input, unsigned int size) {
 		symbol_frequencies[input[i]]++;
 	}
 
-	unsigned int huffman_size;
-	unsigned int * huffman_table;
+	unsigned int symbols_huffman_size;
+	unsigned int * symbols_huffman_table;
 
-	huffman_table = generate_huffman_table(&huffman_size, symbol_frequencies, num_symbols);
+	symbols_huffman_table = generate_huffman_table(&symbols_huffman_size, symbol_frequencies, num_symbols);
 
-	char** codes = malloc(num_symbols * sizeof(char*));
-	memset(codes, 0, num_symbols * sizeof(char*));
+	char** symbol_codes = malloc(num_symbols * sizeof(char*));
+	memset(symbol_codes, 0, num_symbols * sizeof(char*));
 
-	generate_huffman_codes(codes, huffman_table, num_symbols);
+	generate_huffman_codes(symbol_codes, symbols_huffman_table, num_symbols);
 
 	for (int i = 0; i < num_symbols; i++) {
-		printf("Symbol %u has code %s\n", i, codes[i]);
+		printf("Symbol %u has code %s\n", i, symbol_codes[i]);
 	}
 
-	free(symbol_frequencies);
+	unsigned int num_lengths = 0;
+	for (unsigned int i = 0; i < size ; i+= 2) {
+		if (input[i] > num_lengths) {
+			num_lengths = input[i];
+		}
+	}
+	printf("lengths in RLE runs range from 0 to %u\n", num_lengths);
+
+	num_lengths++;
+
+	unsigned int* length_frequencies = malloc(num_lengths * sizeof(unsigned int));
+
+	if (!length_frequencies) {
+		fprintf(stderr, __FILE__":%d Could not allocate %lu bytes for length frequencies\n",
+					__LINE__,
+					num_lengths * sizeof(unsigned int));
+		exit(1);
+	}
+
+	memset(length_frequencies, 0, num_lengths * sizeof(unsigned int));
+
+	for (unsigned int i = 0; i < size ; i+= 2) {
+		length_frequencies[input[i]]++;
+	}
+
+	unsigned int lengths_huffman_size;
+	unsigned int * lengths_huffman_table;
+
+	lengths_huffman_table = generate_huffman_table(&lengths_huffman_size, length_frequencies, num_lengths);
+
+	char** length_codes = malloc(num_lengths * sizeof(char*));
+	memset(length_codes, 0, num_lengths * sizeof(char*));
+
+	generate_huffman_codes(length_codes, lengths_huffman_table, num_lengths);
+
+	for (unsigned int i = 0; i < num_lengths; i++) {
+		printf("length %u has code %s\n", i, length_codes[i]);
+	}
+
+	unsigned int output_bits = 0;
+
+	for (unsigned i = 0; i < size; i += 2) {
+/*		printf("Run length %u symbol %u stored in %u+%u bits\n",
+					input[i], input[i+1],
+					(unsigned int)strlen(length_codes[input[i]]),
+					(unsigned int)strlen(symbol_codes[input[i+1]]));*/
+		output_bits += (unsigned int)strlen(length_codes[input[i]])
+					+ (unsigned int)strlen(symbol_codes[input[i+1]]);
+	}
+	printf("Total output size %u bits (= %u bytes)\n", output_bits, (output_bits + 7) / 8);
+
 }
 
 void main() {
