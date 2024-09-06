@@ -126,35 +126,6 @@ void main() {
 	free(rle_output);
 
 
-/*
-	for (int n = 0; n < 64000; n++) {
-		output[n] = pix[n];
-	}
-
-	FILE* outputfile = fopen("out/gfx/pixels.bin", "wb");
-	fwrite(output, 1, 64000, outputfile);
-	fclose(outputfile);
-
-	move_to_front();
-
-	for (int n = 0; n < 64000; n++) {
-		output[n] = pixmod[n];
-	}
-
-	outputfile = fopen("out/gfx/mtf.bin", "wb");
-	fwrite(output, 1, 64000, outputfile);
-	fclose(outputfile);
-
-	back_from_front();
-
-	for (int n = 0; n < 64000; n++) {
-		output[n] = pixback[n];
-	}
-
-	outputfile = fopen("out/gfx/mtfback.bin", "wb");
-	fwrite(output, 1, 64000, outputfile);
-	fclose(outputfile);
-*/
 
 /*	int s = 0;
 
