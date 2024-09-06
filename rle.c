@@ -141,18 +141,3 @@ void process_rle_runs(unsigned int * rle_lengths,
 	printf("Total output size %u bits (= %u bytes)\n", output_bits, (output_bits + 7) / 8);
 
 }
-
-void main() {
-	unsigned int * pixels = read_tga();
-
-	unsigned int * rle_lengths;
-	unsigned int * rle_values;
-	unsigned int num_runs;
-
-	find_rle_runs(&rle_lengths, &rle_values, &num_runs, pixels, 64000, 100);
-
-	process_rle_runs(rle_lengths, rle_values, num_runs);
-
-	free(rle_lengths);
-	free(rle_values);
-}
