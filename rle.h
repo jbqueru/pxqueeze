@@ -28,7 +28,10 @@ void rle_find_runs(
 	unsigned int const input_size,
 	unsigned int const max_run_length);
 
-void rle_process_runs(
+/*
+ * One Huffman table for lengths, one for values, that's it.
+ */
+void rle_naive_process_runs(
 	unsigned int const * const rle_lengths,
 	unsigned int const * const rle_values,
 	unsigned int const size);

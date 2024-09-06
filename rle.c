@@ -84,14 +84,24 @@ void rle_find_runs(
 	*output_size = write_offset;
 }
 
-void rle_process_runs(unsigned int const * const rle_lengths,
-				unsigned int const * const rle_values,
-				unsigned int const size) {
+void rle_naive_process_runs(
+		unsigned int const * const rle_lengths,
+		unsigned int const * const rle_values,
+		unsigned int const size) {
+
 	unsigned int symbols_huffman_size;
 	unsigned int * symbols_huffman_table;
 	unsigned int num_symbols;
 
 	symbols_huffman_table = generate_huffman_table(&symbols_huffman_size, &num_symbols, rle_values, 1, size);
+
+	printf("%u symbols, Huffman table %u, %u distinct values\n", num_symbols, symbols_huffman_size, num_symbols + symbols_huffman_size);
+
+	unsigned int bits = 0;
+	while(num_symbols + symbols_huffman_size > (1 << bits)) bits++;
+
+	printf("%u bits\n", bits);
+	printf("total Huffman table size %u bits\n", 3 + bits * (2 * symbols_huffman_size + 1));
 
 	char** symbol_codes;
 
@@ -99,7 +109,7 @@ void rle_process_runs(unsigned int const * const rle_lengths,
 
 	for (int i = 0; i < num_symbols; i++) {
 		if (symbol_codes[i]) {
-			printf("Symbol %u has code %s\n", i, symbol_codes[i]);
+//			printf("Symbol %u has code %s\n", i, symbol_codes[i]);
 		}
 	}
 
@@ -115,16 +125,12 @@ void rle_process_runs(unsigned int const * const rle_lengths,
 
 	for (unsigned int i = 0; i < num_lengths; i++) {
 		if (length_codes[i]) {
-			printf("length %u has code %s\n", i, length_codes[i]);
+//			printf("length %u has code %s\n", i, length_codes[i]);
 		}
 	}
 	unsigned int output_bits = 0;
 
 	for (unsigned i = 0; i < size; i++) {
-/*		printf("Run length %u symbol %u stored in %u+%u bits\n",
-					input[i], input[i+1],
-					(unsigned int)strlen(length_codes[input[i]]),
-					(unsigned int)strlen(symbol_codes[input[i+1]]));*/
 		output_bits += (unsigned int)strlen(length_codes[rle_lengths[i]])
 					+ (unsigned int)strlen(symbol_codes[rle_values[i]]);
 	}
