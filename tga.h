@@ -17,4 +17,9 @@
 
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-unsigned int* read_tga();
+#ifndef __TGA_H__
+#define __TGA_H__
+
+unsigned int* tga_read();
+
+#endif

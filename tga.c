@@ -20,7 +20,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-unsigned int* read_tga() {
+#include "tga.h"
+
+unsigned int* tga_read() {
 	unsigned char* tga = malloc(192044);
 	FILE* inputfile = fopen("out/gfx/jbq.tga", "rb");
 	fread(tga, 1, 192044, inputfile);

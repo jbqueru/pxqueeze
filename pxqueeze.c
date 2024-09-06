@@ -21,18 +21,19 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "huffman.h"
 #include "rle.h"
 #include "tga.h"
 
 void main() {
-	unsigned int * pixels = read_tga();
+	unsigned int * pixels = tga_read();
 
 	unsigned int * rle_lengths;
 	unsigned int * rle_values;
 	unsigned int num_runs;
 
 	find_rle_runs(&rle_lengths, &rle_values, &num_runs, pixels, 64000, 100);
+
+	free(pixels);
 
 	process_rle_runs(rle_lengths, rle_values, num_runs);
 
