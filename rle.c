@@ -24,74 +24,64 @@
 #include "huffman.h"
 #include "rle.h"
 
+static void allocate_rle_buffers(
+		unsigned int ** const lengths,
+		unsigned int ** const values,
+		unsigned int const buffer_size);
+
+static void resize_rle_buffers(
+		unsigned int ** const lengths,
+		unsigned int ** const values,
+		unsigned int const buffer_size);
+
 void rle_find_runs(
-			unsigned int const ** const output_lengths,
-			unsigned int const ** const output_values,
-			unsigned int * const output_size,
-			unsigned int const * const input_data,
-			unsigned int const input_size,
-			unsigned int const max_run_length) {
-	unsigned int read_offset = 0;
-	unsigned int write_offset = 0;
-	unsigned int current_value;
-	unsigned int current_length;
+		unsigned int const ** const output_lengths,
+		unsigned int const ** const output_values,
+		unsigned int * const output_size,
+		unsigned int const * const input_data,
+		unsigned int const input_size,
+		unsigned int const max_run_length) {
 
 	printf("Looking for RLE runs from %u symbols\n", input_size);
 
-	unsigned int * lengths = malloc(input_size * sizeof(unsigned int));
+	unsigned int read_offset = 0;
+	unsigned int write_offset = 0;
+	unsigned int current_length;
+	unsigned int current_value;
 
-	if (!lengths) {
-		fprintf(stderr, __FILE__":%d Could not allocate %lu bytes for RLE lengths\n",
-					__LINE__,
-					input_size * sizeof(unsigned int));
-		exit(1);
-	}
+	unsigned int * lengths;
+	unsigned int * values;
 
-	unsigned int * values = malloc(input_size * sizeof(unsigned int));
+	// Allocate buffers at maximum theoretical size
+	allocate_rle_buffers(&lengths, &values, input_size);
 
-	if (!lengths) {
-		fprintf(stderr, __FILE__":%d Could not allocate %lu bytes for RLE values\n",
-					__LINE__,
-					input_size * sizeof(unsigned int));
-		exit(1);
-	}
-
+	// Core algorithm
 	while (read_offset < input_size) {
+		// Start a new run
 		current_value = input_data[read_offset++];
 		current_length = 1;
+		// Add to that run
 		while (read_offset < input_size
 					&& input_data[read_offset] == current_value
 					&& current_length < max_run_length) {
 			read_offset++;
 			current_length++;
 		}
+		// Store the run
 		lengths[write_offset] = current_length;
 		values[write_offset] = current_value;
 		write_offset++;
 	}
 
-	lengths = realloc(lengths, write_offset * sizeof(unsigned int));
+	printf("Found %u RLE runs\n", write_offset);
 
-	if (!lengths) {
-		fprintf(stderr, __FILE__":%d Could not re-allocate %lu bytes for RLE lengths\n",
-					__LINE__,
-					write_offset * sizeof(unsigned int));
-		exit(1);
-	}
+	// Resize buffers to actual usage
+	resize_rle_buffers(&lengths, &values, write_offset);
 
-	values = realloc(values, write_offset * sizeof(unsigned int));
-
-	if (!values) {
-		fprintf(stderr, __FILE__":%d Could not re-allocate %lu bytes for RLE values\n",
-					__LINE__,
-					write_offset * sizeof(unsigned int));
-		exit(1);
-	}
-
+	// Store return values
 	*output_lengths = lengths;
 	*output_values = values;
 	*output_size = write_offset;
-	printf("Found %u RLE runs\n", write_offset);
 }
 
 void rle_process_runs(unsigned int const * const rle_lengths,
@@ -140,4 +130,55 @@ void rle_process_runs(unsigned int const * const rle_lengths,
 	}
 	printf("Total output size %u bits (= %u bytes)\n", output_bits, (output_bits + 7) / 8);
 
+}
+
+static void allocate_rle_buffers(
+		unsigned int ** const lengths,
+		unsigned int ** const values,
+		unsigned int const buffer_size) {
+	*lengths = malloc(buffer_size * sizeof(unsigned int));
+
+	if (!*lengths) {
+		fprintf(stderr, "%s:%d Could not allocate %lu bytes for RLE lengths\n",
+					__FILE__,
+					__LINE__,
+					buffer_size * sizeof(unsigned int));
+		exit(1);
+	}
+
+	*values = malloc(buffer_size * sizeof(unsigned int));
+
+	if (!*values) {
+		fprintf(stderr, "%s:%d Could not allocate %lu bytes for RLE values\n",
+					__FILE__,
+					__LINE__,
+					buffer_size * sizeof(unsigned int));
+		exit(1);
+	}
+
+}
+
+static void resize_rle_buffers(
+		unsigned int ** const lengths,
+		unsigned int ** const values,
+		unsigned int const buffer_size) {
+	*lengths = realloc(*lengths, buffer_size * sizeof(unsigned int));
+
+	if (!*lengths) {
+		fprintf(stderr, "%s:%d Could not re-allocate %lu bytes for RLE lengths\n",
+					__FILE__,
+					__LINE__,
+					buffer_size * sizeof(unsigned int));
+		exit(1);
+	}
+
+	*values = realloc(*values, buffer_size * sizeof(unsigned int));
+
+	if (!*values) {
+		fprintf(stderr, __FILE__"%s:%d Could not re-allocate %lu bytes for RLE values\n",
+					__FILE__,
+					__LINE__,
+					buffer_size * sizeof(unsigned int));
+		exit(1);
+	}
 }
