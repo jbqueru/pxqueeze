@@ -90,7 +90,7 @@ void rle_find_runs(
 	*outSize = write_offset;
 }
 
-void rle_try_strategies(
+void rle_flat_table(
 		unsigned int const * const inLengthP,
 		unsigned int const * const inSymbolP,
 		unsigned int const inSize) {
@@ -133,6 +133,29 @@ void rle_try_strategies(
 	printf("With single table: %u bits of Huffman data (= %u bytes)\n",
 			huffman_stream_length,
 			(huffman_stream_length + 7) / 8);
+
+	char* bitstream = malloc(huffman_stream_length + 1);
+	bitstream[huffman_stream_length - 1] = '\0';
+
+	printf("Entry width %u (stored as %u)\n", huffman_bit_width, huffman_bit_width - 2);
+	printf("%c", '0' + (((huffman_bit_width - 2) & 4) != 0));
+	printf("%c", '0' + (((huffman_bit_width - 2) & 2) != 0));
+	printf("%c", '0' + (((huffman_bit_width - 2) & 1) != 0));
+	printf("\n");
+
+	printf("Huffman table first node %u\n", huffman_start);
+	for (int i = 0; i < huffman_bit_width; i++) {
+		printf("%c", huffman_start & (1 << (huffman_bit_width - i - 1)) ? '1':'0');
+	}
+	printf("\n");
+
+	for (int j = 0; j < huffman_size * 2; j++) {
+		printf("Huffman table entry %u: %u\n", j, huffman_table[j]);
+		for (int i = 0; i < huffman_bit_width; i++) {
+			printf("%c", '0' + ((huffman_table[j] & (1 << (huffman_bit_width - i - 1))) != 0));
+		}
+		printf("\n");
+	}
 
 	free(buffer);
 	free((void*)huffman_table);

@@ -17,30 +17,11 @@
 
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#ifndef __PXQUEEZE_H__
+#define __PXQUEEZE_H__
 
-#include "rle.h"
-#include "tga.h"
+struct params {
+	unsigned int max_rle_run;
+};
 
-int main(int argc, char* argv[]) {
-	unsigned int * pixels = tga_read();
-
-	unsigned int const * rle_lengths;
-	unsigned int const * rle_values;
-	unsigned int num_runs;
-
-	rle_find_runs(&rle_lengths, &rle_values, &num_runs, pixels, 64000, 100);
-
-	free((void*)pixels);
-
-	rle_try_strategies(rle_lengths, rle_values, num_runs);
-
-	rle_naive_process_runs(rle_lengths, rle_values, num_runs);
-
-	free((void*)rle_lengths);
-	free((void*)rle_values);
-
-	return 0;
-}
+#endif

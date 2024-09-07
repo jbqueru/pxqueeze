@@ -28,7 +28,7 @@ void rle_find_runs(
 	unsigned int const inSize,
 	unsigned int const inMaxRunLength);
 
-void rle_try_strategies(
+void rle_flat_table(
 	unsigned int const * const inLengthP,
 	unsigned int const * const inSymbolP,
 	unsigned int const inSize);

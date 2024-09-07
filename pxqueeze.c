@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "pxqueeze.h"
 #include "rle.h"
 #include "tga.h"
 
@@ -35,7 +36,7 @@ int main(int argc, char* argv[]) {
 
 	free((void*)pixels);
 
-	rle_try_strategies(rle_lengths, rle_values, num_runs);
+	rle_flat_table(rle_lengths, rle_values, num_runs);
 
 	rle_naive_process_runs(rle_lengths, rle_values, num_runs);
 
