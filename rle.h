@@ -28,6 +28,11 @@ void rle_find_runs(
 	unsigned int const inSize,
 	unsigned int const inMaxRunLength);
 
+void rle_try_strategies(
+	unsigned int const * const inLengthP,
+	unsigned int const * const inSymbolP,
+	unsigned int const inSize);
+
 /*
  * One Huffman table for lengths, one for values, that's it.
  */

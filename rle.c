@@ -90,6 +90,54 @@ void rle_find_runs(
 	*outSize = write_offset;
 }
 
+void rle_try_strategies(
+		unsigned int const * const inLengthP,
+		unsigned int const * const inSymbolP,
+		unsigned int const inSize) {
+
+	unsigned int * buffer;
+	unsigned int huffman_bit_width;
+
+	unsigned int const * huffman_table;
+	unsigned int huffman_size;
+	unsigned int huffman_start;
+	char** huffman_codes;
+	unsigned int huffman_stream_length;
+
+	printf("Trying RLE strategy: single table\n");
+
+	buffer = malloc(2 * inSize * sizeof(unsigned int));
+	memcpy(buffer, inLengthP, inSize * sizeof(unsigned int));
+	memcpy(buffer + inSize, inSymbolP, inSize * sizeof(unsigned int));
+
+	generate_huffman_table(
+			&huffman_table,
+			&huffman_size,
+			&huffman_start,
+			buffer,
+			1,
+			2 * inSize);
+
+	huffman_codes = generate_huffman_codes(huffman_table, huffman_start);
+
+	huffman_bit_width = 0;
+	while (huffman_start + huffman_size > (1 << huffman_bit_width)) {
+		huffman_bit_width++;
+	}
+
+	huffman_stream_length = 3 + (2 * huffman_size + 1) * huffman_bit_width;
+	for (unsigned i = 0; i < 2 * inSize; i++) {
+		huffman_stream_length += (unsigned int)strlen(huffman_codes[buffer[i]]);
+	}
+
+	printf("With single table: %u bits of Huffman data (= %u bytes)\n",
+			huffman_stream_length,
+			(huffman_stream_length + 7) / 8);
+
+	free(buffer);
+	free((void*)huffman_table);
+}
+
 void rle_naive_process_runs(
 		unsigned int const * const rle_lengths,
 		unsigned int const * const rle_values,
