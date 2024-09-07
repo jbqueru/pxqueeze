@@ -90,10 +90,10 @@ void rle_naive_process_runs(
 		unsigned int const size) {
 
 	unsigned int symbols_huffman_size;
-	unsigned int * symbols_huffman_table;
+	unsigned int const * symbols_huffman_table;
 	unsigned int num_symbols;
 
-	symbols_huffman_table = generate_huffman_table(&symbols_huffman_size, &num_symbols, rle_values, 1, size);
+	generate_huffman_table(&symbols_huffman_table, &symbols_huffman_size, &num_symbols, rle_values, 1, size);
 
 	printf("%u symbols, Huffman table %u, %u distinct values\n", num_symbols, symbols_huffman_size, num_symbols + symbols_huffman_size);
 
@@ -114,10 +114,10 @@ void rle_naive_process_runs(
 	}
 
 	unsigned int lengths_huffman_size;
-	unsigned int * lengths_huffman_table;
+	unsigned int const * lengths_huffman_table;
 	unsigned int num_lengths;
 
-	lengths_huffman_table = generate_huffman_table(&lengths_huffman_size, &num_lengths, rle_lengths, 1, size);
+	generate_huffman_table(&lengths_huffman_table, &lengths_huffman_size, &num_lengths, rle_lengths, 1, size);
 
 	bits = 0;
 	while(num_lengths + lengths_huffman_size > (1 << bits)) bits++;

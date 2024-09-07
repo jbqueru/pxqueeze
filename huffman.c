@@ -21,12 +21,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-unsigned int * generate_huffman_table(
-			unsigned int * const output_size,
-			unsigned int * const output_num_symbols,
-			unsigned int const * const input,
-			unsigned int const input_pitch,
-			unsigned int const input_size) {
+void generate_huffman_table(
+		unsigned int const ** const output_table,
+		unsigned int * const output_size,
+		unsigned int * const output_num_symbols,
+		unsigned int const * const input,
+		unsigned int const input_pitch,
+		unsigned int const input_size) {
 	// Compute symbol range
 	unsigned int num_symbols = 0;
 	for (unsigned int i = 0; i < input_size ; i++) {
@@ -178,7 +179,7 @@ unsigned int * generate_huffman_table(
 	}
 	printf("Completed Huffman table with %u nodes\n", (distinct_symbols - 1));
 	*output_size = (distinct_symbols - 1);
-	return huffman;
+	*output_table = huffman;
 }
 
 static void codes_inner(char** codes,

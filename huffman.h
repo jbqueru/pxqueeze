@@ -17,13 +17,14 @@
 
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-unsigned int * generate_huffman_table(
-			unsigned int * const output_size,
-			unsigned int * const num_symbols,
-			unsigned int const * const input,
-			unsigned int const input_pitch,
-			unsigned int const input_size);
+void generate_huffman_table(
+		unsigned int const ** const output_table,
+		unsigned int * const output_size,
+		unsigned int * const num_symbols,
+		unsigned int const * const input,
+		unsigned int const input_pitch,
+		unsigned int const input_size);
 
 char** generate_huffman_codes(
-			unsigned int const * const huffman_table,
-			unsigned int num_symbols);
+		unsigned int const * const huffman_table,
+		unsigned int num_symbols);
