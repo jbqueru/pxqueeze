@@ -24,64 +24,70 @@
 #include "huffman.h"
 #include "rle.h"
 
-static void allocate_rle_buffers(
-		unsigned int ** const lengths,
-		unsigned int ** const values,
-		unsigned int const buffer_size);
+/*
+* Helper function: allocate two arrays of the same size, exit in case of error
+*/
+static void _allocate_arrays(
+		unsigned int ** const lengthArrayP,
+		unsigned int ** const symbolArrayP,
+		unsigned int const array_size);
 
-static void resize_rle_buffers(
-		unsigned int ** const lengths,
-		unsigned int ** const values,
-		unsigned int const buffer_size);
+/*
+* Helper function: resize two arrays to the same size, exit in case of error
+*/
+static void _resize_arrays(
+		unsigned int ** const lengthArrayP,
+		unsigned int ** const symbolArrayP,
+		unsigned int const array_size);
 
 void rle_find_runs(
-		unsigned int const ** const output_lengths,
-		unsigned int const ** const output_values,
-		unsigned int * const output_size,
-		unsigned int const * const input_data,
-		unsigned int const input_size,
-		unsigned int const max_run_length) {
+		unsigned int const ** const outLengthP,
+		unsigned int const ** const outSymbolP,
+		unsigned int * const outSize,
+		unsigned int const * const inData,
+		unsigned int const inSize,
+		unsigned int const inMaxRunLength) {
 
-	printf("Looking for RLE runs from %u symbols\n", input_size);
+	printf("Looking for RLE runs from %u symbols\n", inSize);
 
 	unsigned int read_offset = 0;
 	unsigned int write_offset = 0;
 	unsigned int current_length;
-	unsigned int current_value;
+	unsigned int current_symbol;
 
 	unsigned int * lengths;
-	unsigned int * values;
+	unsigned int * symbols;
 
 	// Allocate buffers at maximum theoretical size
-	allocate_rle_buffers(&lengths, &values, input_size);
+	_allocate_arrays(&lengths, &symbols, inSize);
 
 	// Core algorithm
-	while (read_offset < input_size) {
+	while (read_offset < inSize) {
 		// Start a new run
-		current_value = input_data[read_offset++];
+		current_symbol = inData[read_offset++];
 		current_length = 1;
 		// Add to that run
-		while (read_offset < input_size
-					&& input_data[read_offset] == current_value
-					&& current_length < max_run_length) {
+		while (read_offset < inSize
+					&& inData[read_offset] == current_symbol
+					&& current_length < inMaxRunLength) {
 			read_offset++;
 			current_length++;
 		}
 		// Store the run
 		lengths[write_offset] = current_length;
-		values[write_offset] = current_value;
+		symbols[write_offset] = current_symbol;
 		write_offset++;
 	}
 
 	printf("Found %u RLE runs\n", write_offset);
 
 	// Resize buffers to actual usage
-	resize_rle_buffers(&lengths, &values, write_offset);
+	_resize_arrays(&lengths, &symbols, write_offset);
 
 	// Store return values
-	*output_lengths = lengths;
-	*output_values = values;
-	*output_size = write_offset;
+	*outLengthP = lengths;
+	*outSymbolP = symbols;
+	*outSize = write_offset;
 }
 
 void rle_naive_process_runs(
@@ -144,53 +150,63 @@ void rle_naive_process_runs(
 
 }
 
-static void allocate_rle_buffers(
-		unsigned int ** const lengths,
-		unsigned int ** const values,
-		unsigned int const buffer_size) {
-	*lengths = malloc(buffer_size * sizeof(unsigned int));
+static void _allocate_arrays(
+		unsigned int ** const lengthArrayP,
+		unsigned int ** const symbolArrayP,
+		unsigned int const array_size) {
 
-	if (!*lengths) {
+	// Allocate first array
+	*lengthArrayP = malloc(array_size * sizeof(unsigned int));
+
+	// Check that allocation was successful, exit if not
+	if (!*lengthArrayP) {
 		fprintf(stderr, "%s:%d Could not allocate %lu bytes for RLE lengths\n",
 					__FILE__,
 					__LINE__,
-					buffer_size * sizeof(unsigned int));
+					array_size * sizeof(unsigned int));
 		exit(1);
 	}
 
-	*values = malloc(buffer_size * sizeof(unsigned int));
+	// Allocate second array
+	*symbolArrayP = malloc(array_size * sizeof(unsigned int));
 
-	if (!*values) {
-		fprintf(stderr, "%s:%d Could not allocate %lu bytes for RLE values\n",
+	// Check that allocation was successful, exit if not
+	if (!*symbolArrayP) {
+		fprintf(stderr, "%s:%d Could not allocate %lu bytes for RLE symbols\n",
 					__FILE__,
 					__LINE__,
-					buffer_size * sizeof(unsigned int));
+					array_size * sizeof(unsigned int));
 		exit(1);
 	}
 
 }
 
-static void resize_rle_buffers(
-		unsigned int ** const lengths,
-		unsigned int ** const values,
-		unsigned int const buffer_size) {
-	*lengths = realloc(*lengths, buffer_size * sizeof(unsigned int));
+static void _resize_arrays(
+		unsigned int ** const lengthArrayP,
+		unsigned int ** const symbolArrayP,
+		unsigned int const array_size) {
 
-	if (!*lengths) {
+	// Resize first array
+	*lengthArrayP = realloc(*lengthArrayP, array_size * sizeof(unsigned int));
+
+	// Check that resize was successful, exit if not
+	if (!*lengthArrayP) {
 		fprintf(stderr, "%s:%d Could not re-allocate %lu bytes for RLE lengths\n",
 					__FILE__,
 					__LINE__,
-					buffer_size * sizeof(unsigned int));
+					array_size * sizeof(unsigned int));
 		exit(1);
 	}
 
-	*values = realloc(*values, buffer_size * sizeof(unsigned int));
+	// Resize second array
+	*symbolArrayP = realloc(*symbolArrayP, array_size * sizeof(unsigned int));
 
-	if (!*values) {
+	// Check that resize was successful, exit if not
+	if (!*symbolArrayP) {
 		fprintf(stderr, __FILE__"%s:%d Could not re-allocate %lu bytes for RLE values\n",
 					__FILE__,
 					__LINE__,
-					buffer_size * sizeof(unsigned int));
+					array_size * sizeof(unsigned int));
 		exit(1);
 	}
 }

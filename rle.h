@@ -21,12 +21,12 @@
 #define __RLE_H__
 
 void rle_find_runs(
-	unsigned int const ** const output_lengths,
-	unsigned int const ** const output_values,
-	unsigned int * const output_size,
-	unsigned int const * const input_data,
-	unsigned int const input_size,
-	unsigned int const max_run_length);
+	unsigned int const ** const outLengthP,
+	unsigned int const ** const outSymbolP,
+	unsigned int * const outSize,
+	unsigned int const * const inData,
+	unsigned int const inSize,
+	unsigned int const inMaxRunLength);
 
 /*
  * One Huffman table for lengths, one for values, that's it.
