@@ -100,8 +100,8 @@ void rle_naive_process_runs(
 	unsigned int bits = 0;
 	while(num_symbols + symbols_huffman_size > (1 << bits)) bits++;
 
-	printf("%u bits\n", bits);
-	printf("total Huffman table size %u bits\n", 3 + bits * (2 * symbols_huffman_size + 1));
+	printf("%u bits per value node address\n", bits);
+	printf("total Huffman value table size %u bits\n", 3 + bits * (2 * symbols_huffman_size + 1));
 
 	char** symbol_codes;
 
@@ -118,6 +118,12 @@ void rle_naive_process_runs(
 	unsigned int num_lengths;
 
 	lengths_huffman_table = generate_huffman_table(&lengths_huffman_size, &num_lengths, rle_lengths, 1, size);
+
+	bits = 0;
+	while(num_lengths + lengths_huffman_size > (1 << bits)) bits++;
+
+	printf("%u bits per length node address\n", bits);
+	printf("total Huffman length table size %u bits\n", 3 + bits * (2 * lengths_huffman_size + 1));
 
 	char** length_codes;
 
