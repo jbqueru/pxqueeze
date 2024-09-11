@@ -29,6 +29,7 @@ void rle_find_runs(
 	unsigned int const inMaxRunLength);
 
 void rle_flat_table(
+	char const ** const outBitStreamP,
 	unsigned int const * const inLengthP,
 	unsigned int const * const inSymbolP,
 	unsigned int const inSize);

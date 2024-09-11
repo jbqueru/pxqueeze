@@ -36,7 +36,8 @@ int main(int argc, char* argv[]) {
 
 	free((void*)pixels);
 
-	rle_flat_table(rle_lengths, rle_values, num_runs);
+	char const * flat_bitstream;
+	rle_flat_table(&flat_bitstream, rle_lengths, rle_values, num_runs);
 
 	rle_naive_process_runs(rle_lengths, rle_values, num_runs);
 
